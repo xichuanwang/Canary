@@ -1,57 +1,41 @@
 ( function() {
 
-	var Canary = function () {
-	}
+	var Canary = function () {}
 
 	Canary.toJPG = function( src, callback ) {
-		var assets = _prepare( src );
-
-		assets.Image.onload = function( ) { 
-			assets.Canvas.width = assets.Image.width;
-			assets.Canvas.height = assets.Image.height;
-			assets.Context.drawImage( assets.Image, 0, 0 );
-
-			var s = assets.Canvas.toDataURL( 'image/jpeg' );
-			_removeHiddenCanvas( assets.Canvas );
-			callback( s );
-		}
-
-		assets.Image.src = assets.Source;
+		_prepare( src, callback, 'image/jpeg' );
 	}
 
 	Canary.toPNG = function( src, callback ) {
-		var assets = _prepare( src );
-
-		assets.Image.onload = function( ) { 
-			assets.Canvas.width = assets.Image.width;
-			assets.Canvas.height = assets.Image.height;
-			assets.Context.drawImage( assets.Image, 0, 0 );
-
-			var s = assets.Canvas.toDataURL( 'image/png' );
-			_removeHiddenCanvas( assets.Canvas );
-			callback( s );
-		}
-
-		assets.Image.src = assets.Source;
+		_prepare( src, callback, 'image/png' );
 	}
 
-	var _prepare = function( src ) { 
-		console.log( Canary );
+	var _prepare = function( src, callback, filetype ) { 
+		if( typeof src !== 'string' )
+			throw new TypeError( 'Source must be a string' );
+
 		if( !src )
 			throw new Error( 'No Image Source Defined.' );
+
+		if( !callback || typeof callback !== 'function' )
+			throw new Error( 'Callback is not defined or not of type "function"' );
+
+		if( !filetype )
+			filetype = 'image/png';
 
 		var canvas = _createHiddenCanvas( );
 		var context = canvas.getContext( '2d' );
 		var image = new Image( );
-		
-		var assets = { 
-			Canvas : canvas,
-			Context : context,
-			Image : image,
-			Source : src
-		};
 
-		return assets;
+		image.onload = function( ) { 
+			context.drawImage( image, 0, 0 );
+
+			var s = canvas.toDataURL( filetype );
+			_removeHiddenCanvas( canvas );
+			callback.call( this, s );
+		}
+
+		image.src = src;
 	}
 
 	var _createHiddenCanvas = function( ) { 

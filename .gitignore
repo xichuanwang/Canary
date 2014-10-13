@@ -1,0 +1,6 @@
+#
+# Don't move these files stupid.
+#
+node_modules/
+.DS_Store
+
